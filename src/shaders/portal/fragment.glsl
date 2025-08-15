@@ -83,24 +83,49 @@ float cnoise(vec3 P)
 
 void main()
 {
-    // Displace the UV
-    vec2 displacedUv = vUv + cnoise(vec3(vUv * 5.0, uTime * 0.1));
+    // Enhanced UV manipulation with spiral distortion
+    vec2 centerUv = vUv - 0.5;
+    float distanceFromCenter = length(centerUv);
+    
+    // Create spiral effect
+    float angle = atan(centerUv.y, centerUv.x);
+    float spiral = sin(angle * 4.0 + uTime * 2.0) * 0.1;
+    
+    // Multi-layer displacement for complexity
+    vec2 displacedUv = vUv + cnoise(vec3(vUv * 5.0, uTime * 0.1)) * 0.2;
+    displacedUv += spiral * distanceFromCenter;
 
-    // Perlin noise
-    float strength = cnoise(vec3(displacedUv * 5.0, uTime * 0.2));
+    // Multiple noise layers
+    float noise1 = cnoise(vec3(displacedUv * 5.0, uTime * 0.2));
+    float noise2 = cnoise(vec3(displacedUv * 10.0, uTime * 0.15)) * 0.5;
+    float noise3 = cnoise(vec3(vUv * 2.0, uTime * 0.3)) * 0.3;
+    
+    float strength = noise1 + noise2 + noise3;
 
-    // Outer glow
-    float outerGlow = distance(vUv, vec2(0.5)) * 5.0 - 1.4;
+    // Enhanced outer glow with pulsing
+    float pulse = sin(uTime * 3.0) * 0.2 + 0.8;
+    float outerGlow = (distance(vUv, vec2(0.5)) * 5.0 - 1.4) * pulse;
     strength += outerGlow;
 
-    // Apply cool step
-    strength += step(- 0.2, strength) * 0.8;
+    // Create ring patterns
+    float rings = sin(distanceFromCenter * 15.0 - uTime * 4.0) * 0.1;
+    strength += rings;
 
-    // // Clamp the value from 0 to 1
-    // strength = clamp(strength, 0.0, 1.0);
+    // Apply enhanced step function
+    strength += step(-0.2, strength) * 0.8;
 
-    // Final color
-    vec3 color = mix(uColorStart, uColorEnd, strength);
+    // Create mystical purple-blue color scheme
+    vec3 colorA = vec3(0.8, 0.2, 1.0); // Bright purple
+    vec3 colorB = vec3(0.2, 0.8, 1.0); // Cyan blue  
+    vec3 colorC = vec3(1.0, 0.6, 0.8); // Pink highlight
+    
+    // Multi-color mixing based on different factors
+    vec3 color1 = mix(uColorStart, colorA, strength);
+    vec3 color2 = mix(colorB, uColorEnd, strength * 0.7);
+    vec3 finalColor = mix(color1, color2, sin(uTime + distanceFromCenter * 5.0) * 0.5 + 0.5);
+    
+    // Add pink highlights in center
+    finalColor = mix(finalColor, colorC, step(0.8, strength) * 0.6);
 
-    gl_FragColor = vec4(color, 1.0);
+    gl_FragColor = vec4(finalColor, 1.0);
 }

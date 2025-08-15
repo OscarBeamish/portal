@@ -7,5 +7,32 @@ body,
     left: 0;
     width: 100%;
     height: 100%;
-    background: ivory;
+    background: radial-gradient(ellipse at center, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+    overflow: hidden;
 }
+
+/* Add some mystical cursor effects */
+body {
+    cursor: none;
+}
+
+/* Custom cursor */
+body::before {
+    content: '';
+    position: fixed;
+    width: 20px;
+    height: 20px;
+    background: radial-gradient(circle, rgba(128, 64, 255, 0.8) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.4; }
+}
+
+/* Update cursor position with JavaScript would be needed for full effect */
